@@ -65,6 +65,15 @@ AADGRAPH_URLS = {
     "china": "graph.chinacloudapi.cn"
 }
 
+# Device Registration Service (DRS) hosts per national cloud. The device/key
+# enrollment endpoints live on these hosts (EnrollmentServer/...). National
+# cloud hosts should be verified against the tenant's DRS discovery metadata.
+DRS_URLS = {
+    "global": "enterpriseregistration.windows.net",
+    "us": "enterpriseregistration.microsoftonline.us",
+    "china": "enterpriseregistration.partner.microsoftonline.cn"
+}
+
 DSSO_BODY_KERBEROS = '''<?xml version='1.0' encoding='UTF-8'?>
 <s:Envelope
     xmlns:s='http://www.w3.org/2003/05/soap-envelope'

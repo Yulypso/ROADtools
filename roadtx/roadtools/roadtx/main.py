@@ -1552,9 +1552,9 @@ def main():
                 except FileNotFoundError:
                     print('No auth data found. Ether supply an access token with --access-token or make sure a token is present on disk in .roadtools_auth')
                     return
-            if tokendata['aud'] != 'urn:ms-drs:enterpriseregistration.windows.net':
-                print(f"Wrong token audience, got {tokendata['aud']} but expected: urn:ms-drs:enterpriseregistration.windows.net")
-                print("Make sure to request a token with -r urn:ms-drs:enterpriseregistration.windows.net")
+            if not tokendata['aud'].startswith('urn:ms-drs:enterpriseregistration'):
+                print(f"Wrong token audience, got {tokendata['aud']} but expected a device registration (DRS) resource: urn:ms-drs:enterpriseregistration.*")
+                print("Make sure to request a token with -r urn:ms-drs:enterpriseregistration.windows.net (or the national cloud DRS resource)")
                 return
             if args.action == 'join':
                 jointype = 0
@@ -2491,9 +2491,9 @@ def main():
                 except FileNotFoundError:
                     print('No auth data found. Ether supply an access token with --access-token or make sure a token is present on disk in .roadtools_auth')
                     return
-            if tokendata['aud'] != 'urn:ms-drs:enterpriseregistration.windows.net':
-                print(f"Wrong token audience, got {tokendata['aud']} but expected: urn:ms-drs:enterpriseregistration.windows.net")
-                print("Make sure to request a token with -r urn:ms-drs:enterpriseregistration.windows.net")
+            if not tokendata['aud'].startswith('urn:ms-drs:enterpriseregistration'):
+                print(f"Wrong token audience, got {tokendata['aud']} but expected a device registration (DRS) resource: urn:ms-drs:enterpriseregistration.*")
+                print("Make sure to request a token with -r urn:ms-drs:enterpriseregistration.windows.net (or the national cloud DRS resource)")
                 return
             result = auth.get_bulk_enrollment_token(access_token=tokenobject['accessToken'])
             if result:

@@ -289,7 +289,7 @@ class DeviceAuthentication():
         data = {
             "kngc": pubkeycngblob.decode('utf-8')
         }
-        res = self.auth.requests_post('https://enterpriseregistration.windows.net/EnrollmentServer/key/?api-version=1.0', json=data, headers=headers, proxies=self.proxies, verify=self.verify)
+        res = self.auth.requests_post(f'https://{self.auth.get_drs_host()}/EnrollmentServer/key/?api-version=1.0', json=data, headers=headers, proxies=self.proxies, verify=self.verify)
         return res.json()
 
     def create_pubkey_blob_from_key(self, key):
@@ -547,7 +547,7 @@ class DeviceAuthentication():
         }
 
         print('Registering device')
-        res = self.auth.requests_post(f'https://enterpriseregistration.windows.net/EnrollmentServer/device/?api-version={api_version}', json=data, headers=headers, proxies=self.proxies, verify=self.verify)
+        res = self.auth.requests_post(f'https://{self.auth.get_drs_host()}/EnrollmentServer/device/?api-version={api_version}', json=data, headers=headers, proxies=self.proxies, verify=self.verify)
         returndata = res.json()
         if not 'Certificate' in returndata:
             print('Error registering device! Got response:')
@@ -657,7 +657,7 @@ class DeviceAuthentication():
             deviceid = attr.value
         print(f"Device ID (from certificate): {deviceid}")
         print('Registering device')
-        res = requests.put(f'https://enterpriseregistration.windows.net/EnrollmentServer/device/{deviceid}?api-version=2.0', json=data, headers=headers, proxies=self.proxies, verify=self.verify)
+        res = requests.put(f'https://{self.auth.get_drs_host()}/EnrollmentServer/device/{deviceid}?api-version=2.0', json=data, headers=headers, proxies=self.proxies, verify=self.verify)
         returndata = res.json()
         if not 'Certificate' in returndata:
             print('Error registering device! Got response:')
@@ -682,7 +682,7 @@ class DeviceAuthentication():
             deviceid = attribute.value
         if not deviceid:
             return
-        res = requests.delete(f'https://enterpriseregistration.windows.net/EnrollmentServer/device/{deviceid}', cert=(certpath, keypath))
+        res = requests.delete(f'https://{self.auth.get_drs_host()}/EnrollmentServer/device/{deviceid}', cert=(certpath, keypath))
         if res.status_code != 200:
             print('Error deleting device:')
             print(res.content)

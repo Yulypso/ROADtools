@@ -26,7 +26,7 @@ from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography import x509
 from roadtools.roadlib.constants import WELLKNOWN_RESOURCES, WELLKNOWN_CLIENTS, WELLKNOWN_USER_AGENTS, \
     DSSO_BODY_KERBEROS, DSSO_BODY_USERPASS, SAML_TOKEN_TYPE_V1, SAML_TOKEN_TYPE_V2, GRANT_TYPE_SAML1_1, \
-    WSS_SAML_TOKEN_PROFILE_V1_1, WSS_SAML_TOKEN_PROFILE_V2, GRANT_TYPE_SAML2, AUTHORITIES
+    WSS_SAML_TOKEN_PROFILE_V1_1, WSS_SAML_TOKEN_PROFILE_V2, GRANT_TYPE_SAML2, AUTHORITIES, DRS_URLS
 from roadtools.roadlib.wstrust import Mex, build_rst, parse_wstrust_response
 import requests
 import jwt
@@ -84,6 +84,17 @@ class Authentication():
         if self.tenant is not None:
             return f'https://{self.authority}/{self.tenant}'
         return f'https://{self.authority}/{default_tenant}'
+
+    def get_drs_host(self):
+        """
+        Returns the Device Registration Service (DRS) host matching the current
+        authority / national cloud. Falls back to the global host for custom or
+        unknown authorities.
+        """
+        for cloud, authorityhost in AUTHORITIES.items():
+            if authorityhost == self.authority:
+                return DRS_URLS.get(cloud, DRS_URLS['global'])
+        return DRS_URLS['global']
 
     def set_authority(self, authority):
         """
