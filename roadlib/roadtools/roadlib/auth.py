@@ -96,6 +96,12 @@ class Authentication():
                 return DRS_URLS.get(cloud, DRS_URLS['global'])
         return DRS_URLS['global']
 
+    def get_drs_resource(self):
+        """
+        Returns the DRS token audience (urn:ms-drs:<host>) for the current authority
+        """
+        return f'urn:ms-drs:{self.get_drs_host()}'
+
     def set_authority(self, authority):
         """
         Sets client ID to use (accepts aliases)
@@ -1881,11 +1887,12 @@ class Authentication():
         signature = get_data(dataparts[2])
         return header, body, signature
 
-    @staticmethod
-    def lookup_resource_uri(uri):
+    def lookup_resource_uri(self, uri):
         """
-        Translate resource URI aliases
+        Translate resource URI aliases (national cloud aware for the DRS aliases)
         """
+        if uri.lower() in ('drs', 'devicereg'):
+            return self.get_drs_resource()
         try:
             resolved = WELLKNOWN_RESOURCES[uri.lower()]
             return resolved

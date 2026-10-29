@@ -1552,9 +1552,10 @@ def main():
                 except FileNotFoundError:
                     print('No auth data found. Ether supply an access token with --access-token or make sure a token is present on disk in .roadtools_auth')
                     return
-            if not tokendata['aud'].startswith('urn:ms-drs:enterpriseregistration'):
-                print(f"Wrong token audience, got {tokendata['aud']} but expected a device registration (DRS) resource: urn:ms-drs:enterpriseregistration.*")
-                print("Make sure to request a token with -r urn:ms-drs:enterpriseregistration.windows.net (or the national cloud DRS resource)")
+            expected_aud = auth.get_drs_resource()
+            if tokendata['aud'] != expected_aud:
+                print(f"Wrong token audience, got {tokendata['aud']} but expected: {expected_aud}")
+                print(f"Make sure to request a token with -r {expected_aud}")
                 return
             if args.action == 'join':
                 jointype = 0
@@ -2453,9 +2454,10 @@ def main():
             except FileNotFoundError:
                 print('No auth data found. Ether supply an access token with --access-token or make sure a token is present on disk in .roadtools_auth')
                 return
-        if tokendata['aud'] != 'urn:ms-drs:enterpriseregistration.windows.net':
-            print(f"Wrong token audience, got {tokendata['aud']} but expected: urn:ms-drs:enterpriseregistration.windows.net")
-            print("Make sure to request a token with -r urn:ms-drs:enterpriseregistration.windows.net")
+        expected_aud = auth.get_drs_resource()
+        if tokendata['aud'] != expected_aud:
+            print(f"Wrong token audience, got {tokendata['aud']} but expected: {expected_aud}")
+            print(f"Make sure to request a token with -r {expected_aud}")
             return
         key, pubkeycngblob = deviceauth.create_hello_key(args.key_pem)
         result = deviceauth.register_winhello_key(pubkeycngblob, tokenobject['accessToken'])
@@ -2491,9 +2493,10 @@ def main():
                 except FileNotFoundError:
                     print('No auth data found. Ether supply an access token with --access-token or make sure a token is present on disk in .roadtools_auth')
                     return
-            if not tokendata['aud'].startswith('urn:ms-drs:enterpriseregistration'):
-                print(f"Wrong token audience, got {tokendata['aud']} but expected a device registration (DRS) resource: urn:ms-drs:enterpriseregistration.*")
-                print("Make sure to request a token with -r urn:ms-drs:enterpriseregistration.windows.net (or the national cloud DRS resource)")
+            expected_aud = auth.get_drs_resource()
+            if tokendata['aud'] != expected_aud:
+                print(f"Wrong token audience, got {tokendata['aud']} but expected: {expected_aud}")
+                print(f"Make sure to request a token with -r {expected_aud}")
                 return
             result = auth.get_bulk_enrollment_token(access_token=tokenobject['accessToken'])
             if result:
