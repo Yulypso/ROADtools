@@ -678,7 +678,7 @@ class AsyncDeviceAuthentication(DeviceAuthentication):
             token_request_data['tgt'] = True
         if self.auth.claims:
             token_request_data['claims'] = json.dumps(self.auth.claims)
-        res = await self.auth.requests_post('https://login.microsoftonline.com/common/oauth2/v2.0/token', data=token_request_data)
+        res = await self.auth.requests_post(f"{self.auth.get_authority_url(force_tenant='common')}/oauth2/v2.0/token", data=token_request_data)
         if res.status != 200:
             raise AuthenticationException(await res.text())
         responsedata = await res.text()
