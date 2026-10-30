@@ -26,7 +26,8 @@ from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography import x509
 from roadtools.roadlib.constants import WELLKNOWN_RESOURCES, WELLKNOWN_CLIENTS, WELLKNOWN_USER_AGENTS, \
     DSSO_BODY_KERBEROS, DSSO_BODY_USERPASS, SAML_TOKEN_TYPE_V1, SAML_TOKEN_TYPE_V2, GRANT_TYPE_SAML1_1, \
-    WSS_SAML_TOKEN_PROFILE_V1_1, WSS_SAML_TOKEN_PROFILE_V2, GRANT_TYPE_SAML2, AUTHORITIES, DRS_URLS
+    WSS_SAML_TOKEN_PROFILE_V1_1, WSS_SAML_TOKEN_PROFILE_V2, GRANT_TYPE_SAML2, AUTHORITIES, DRS_URLS, \
+    NATIONAL_CLOUD_RESOURCE_OVERRIDES
 from roadtools.roadlib.wstrust import Mex, build_rst, parse_wstrust_response
 import requests
 import jwt
@@ -85,16 +86,23 @@ class Authentication():
             return f'https://{self.authority}/{self.tenant}'
         return f'https://{self.authority}/{default_tenant}'
 
+    def get_cloud(self):
+        """
+        Returns the national cloud alias (global / us / china) matching the
+        current authority, falling back to 'global' for custom authorities.
+        """
+        for cloud, authorityhost in AUTHORITIES.items():
+            if authorityhost == self.authority:
+                return cloud
+        return 'global'
+
     def get_drs_host(self):
         """
         Returns the Device Registration Service (DRS) host matching the current
         authority / national cloud. Falls back to the global host for custom or
         unknown authorities.
         """
-        for cloud, authorityhost in AUTHORITIES.items():
-            if authorityhost == self.authority:
-                return DRS_URLS.get(cloud, DRS_URLS['global'])
-        return DRS_URLS['global']
+        return DRS_URLS.get(self.get_cloud(), DRS_URLS['global'])
 
     def get_drs_resource(self):
         """
@@ -1889,15 +1897,24 @@ class Authentication():
 
     def lookup_resource_uri(self, uri):
         """
-        Translate resource URI aliases (national cloud aware for the DRS aliases)
+        Translate resource URI aliases, national cloud aware: the DRS aliases
+        resolve to the authority's DRS audience, and Graph / AAD Graph / ARM
+        resources are swapped to the active cloud's audience.
         """
         if uri.lower() in ('drs', 'devicereg'):
             return self.get_drs_resource()
         try:
             resolved = WELLKNOWN_RESOURCES[uri.lower()]
-            return resolved
         except KeyError:
-            return uri
+            resolved = uri
+        # National cloud: swap a commercial resource audience for the active
+        # cloud's equivalent (Graph / AAD Graph / ARM). Global is unchanged.
+        cloud = self.get_cloud()
+        if cloud != 'global':
+            overrides = NATIONAL_CLOUD_RESOURCE_OVERRIDES.get(resolved)
+            if overrides and cloud in overrides:
+                resolved = overrides[cloud]
+        return resolved
 
     @staticmethod
     def lookup_scope_resource(scopes):
